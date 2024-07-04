@@ -1,0 +1,289 @@
+In an EER diagram, we could have overlapping subtypes, as you know. Assuming there are 3 such subtypes A,B,C, what are three different ways of modeling such a situation? Illustrate by drawing tables. 
+One way to model overlapping subtypes is to use a single table for all subtypes, with a column indicating the subtype for each record. This column can be a foreign key to another table that defines the possible subtypes. For example:
+
+sql
+Copy code
+CREATE TABLE entities (
+  entity_id INTEGER PRIMARY KEY,
+  subtype_id INTEGER REFERENCES subtypes(subtype_id),
+  entity_data TEXT
+);
+
+CREATE TABLE subtypes (
+  subtype_id INTEGER PRIMARY KEY,
+  subtype_name TEXT
+);
+Another way to model overlapping subtypes is to use separate tables for each subtype, but with a shared primary key that allows records to be linked between tables. For example:
+
+sql
+Copy code
+CREATE TABLE entities (
+  entity_id INTEGER PRIMARY KEY
+);
+
+CREATE TABLE subtype_a (
+  entity_id INTEGER PRIMARY KEY REFERENCES entities(entity_id),
+  subtype_a_data TEXT
+);
+
+CREATE TABLE subtype_b (
+  entity_id INTEGER PRIMARY KEY REFERENCES entities(entity_id),
+  subtype_b_data TEXT
+);
+
+CREATE TABLE subtype_c (
+  entity_id INTEGER PRIMARY KEY REFERENCES entities(entity_id),
+  subtype_c_data TEXT
+);
+A third way to model overlapping subtypes is to use a combination of the previous two approaches. Use a single table for common attributes, and separate tables for attributes that are unique to each subtype. For example:
+
+sql
+Copy code
+CREATE TABLE entities (
+  entity_id INTEGER PRIMARY KEY,
+  subtype_id INTEGER REFERENCES subtypes(subtype_id),
+  entity_data TEXT
+);
+
+CREATE TABLE subtypes (
+  subtype_id INTEGER PRIMARY KEY,
+  subtype_name TEXT
+);
+
+CREATE TABLE subtype_a (
+  entity_id INTEGER PRIMARY KEY REFERENCES entities(entity_id),
+  subtype_a_data TEXT
+);
+
+CREATE TABLE subtype_b (
+  entity_id INTEGER PRIMARY KEY REFERENCES entities(entity_id),
+  subtype_b_data TEXT
+);
+
+CREATE TABLE subtype_c (
+  entity_id INTEGER PRIMARY KEY REFERENCES entities(entity_id),
+  subtype_c_data TEXT
+);
+In this approach, the entities table contains common attributes, and the subtype_* tables contain unique attributes for each subtype. The subtype_id column in the entities table can be used to link records to the appropriate subtype table.
+
+
+
+
+Baladithya Balamurugan
+When we talk about entity supertypes and subtypes in EER, we are making an analogy with a class hierarchy, eg. a C++ or Java one. But the analogy between a table and a typical class isn't quite accurate. Why not? And, what would make them equivalent, conceptually speaking? 
+While there are some similarities between entity supertypes and subtypes in EER and class hierarchies in object-oriented programming languages like C++ or Java, there are also some important differences.
+
+One key difference is that in a class hierarchy, subclasses inherit all the properties and methods of their superclass, while in a table with subtypes, the subtype tables only inherit some of the columns from the supertype table. Additionally, in a class hierarchy, subclasses can add new properties and methods, while in a table with subtypes, subtype tables can add new columns, but not new relationships between entities.
+
+Another difference is that in a class hierarchy, objects can belong to multiple classes through the use of interfaces or multiple inheritance, but in a table with subtypes, each entity can only belong to one subtype.
+
+To make a table equivalent to a class hierarchy conceptually, we would need to introduce the notion of methods and inheritance of all properties and methods, not just columns. Additionally, we would need to allow entities to belong to multiple subtypes, and to support interfaces or multiple inheritance.
+
+However, it's worth noting that even though the analogy between tables and classes isn't perfect, the use of entity supertypes and subtypes in EER can still be a useful way to model complex relationships between entities in a database.
+
+
+
+
+Baladithya Balamurugan
+Q2 [1+4 = 5 points]. a. What is the benefit of normalization, what is its drawback? b. In a class of students, each student has an ID and a name. Each student is assigned (given) a book by a popular author to read; many students could be assigned the same book (eg. many might be assigned to read 'The Adventures of Tom Sawyer', by Mark Twain). The class teacher uses a spreadsheet to keep track of the # of hours a student puts in, towards reading her/his book. 
+Show, using a table, how the teacher would store data incorrectly. Show how you would help fix the table. To save time when you answer, you can use 'simple' values like A,B,C... for your data [they don't need to be 'real']. 
+a. The benefit of normalization is that it helps to eliminate data redundancy, which can improve data consistency and reduce the risk of data anomalies. By breaking down a large table into smaller, more specialized tables, we can avoid having the same data stored in multiple places, which can lead to inconsistencies and data errors.
+
+The drawback of normalization is that it can result in more complex database schemas, which can be harder to understand and manage. Additionally, normalization can sometimes lead to slower query performance, as more tables may need to be joined together to retrieve data.
+
+b. Incorrect table structure:
+
+Student ID	Student Name	Book Title	Book Author	Hours Read
+1	John	The Adventures of Tom Sawyer	Mark Twain	10
+2	Sarah	To Kill a Mockingbird	Harper Lee	5
+3	Tom	The Adventures of Tom Sawyer	Mark Twain	8
+This table is storing redundant data because the same book title and author are being repeated for multiple students. This can lead to data inconsistencies if the book title or author are updated for one student but not for others.
+
+Fixed table structure using normalization:
+
+Student ID	Student Name
+1	John
+2	Sarah
+3	Tom
+Book ID	Book Title	Book Author
+1	The Adventures of Tom Sawyer	Mark Twain
+2	To Kill a Mockingbird	Harper Lee
+Assignment ID	Student ID	Book ID	Hours Read
+1	1	1	10
+2	2	2	5
+3	3	1	8
+This table structure eliminates the redundant data by separating the information about students, books, and assignments into separate tables. The Assignment table acts as a bridge table between Student and Book, allowing for a many-to-many relationship between them. This structure ensures data consistency and makes it easier to update book or student information without affecting other records.
+
+
+
+
+Baladithya Balamurugan
+Why is structural dependence a bad thing, when it comes to storing data? Illustrate structural dependence using a small example of your own [with some sample data]. (example tables)
+Structural dependence is a bad thing when it comes to storing data because it can lead to data anomalies and make it difficult to modify the database schema in the future. Structural dependence occurs when data is stored in a way that is dependent on the physical structure of the database table.
+
+For example, let's consider a table called Orders that stores information about customer orders. Here's an example of the table structure:
+
+Order ID	Customer Name	Product Name	Quantity	Price
+1	John Smith	Widget A	2	10.99
+2	Sarah Jones	Widget B	1	7.99
+3	John Smith	Widget A	1	10.99
+In this example, the Customer Name and Product Name columns are structurally dependent on the Order table. If we were to rename the Customer Name column or split it into first and last name columns, we would need to update all records in the Orders table to reflect this change. This can be time-consuming and error-prone.
+
+To illustrate this further, let's consider a scenario where we want to split the Customer Name column into first and last name columns. Here's how the table might look after the change:
+
+Order ID	First Name	Last Name	Product Name	Quantity	Price
+1	John	Smith	Widget A	2	10.99
+2	Sarah	Jones	Widget B	1	7.99
+3	John	Smith	Widget A	1	10.99
+As you can see, we had to update all records in the Orders table to reflect this change. This can be a tedious and error-prone process, especially if the table contains a large number of records.
+
+To avoid structural dependence, it's best to normalize the data by breaking it down into smaller, more specialized tables that are independent of each other. This can help to reduce redundancy and improve data consistency while also making it easier to modify the database schema in the future.
+
+
+
+
+Baladithya Balamurugan
+On the flip side (of structural dependence), we have layered data abstraction - what benefit does layering provide? Explain in two or three sentences (NOT more!). 
+Layered data abstraction provides several benefits. It helps to improve the overall structure and organization of the database by breaking it down into smaller, more manageable layers. It also provides a level of abstraction that makes it easier to modify and maintain the database over time.
+
+
+
+
+Baladithya Balamurugan
+Q4 [1+2+2 = 5 points]. a. In the 'story' of connectivity, about how it all started, leading to where we are today, what were key stops along the way, ie. what were milestones? You can simply list them, no need to elaborate. 
+b. How does data connectivity occur today, ie what is the dominant architecture? Explain in your own words, using your own diagram. 
+c. Briefly discuss two ways via which the web server was (is) augmented to serve data to the client. 
+a. Key milestones in the evolution of connectivity include:
+
+1837: Invention of the telegraph
+1962: Creation of the first packet-switching network (ARPANET)
+1983: Introduction of the TCP/IP protocol suite
+1991: Launch of the World Wide Web
+1995: Introduction of JavaScript
+2004: Launch of Facebook
+2007: Introduction of the iPhone
+b. Today, the dominant architecture for data connectivity is the client-server model. In this model, the client (such as a web browser or mobile app) sends requests to a server over the internet. The server processes the request and sends a response back to the client. The server can use a variety of technologies to process requests and serve data, including web servers, application servers, and database servers.
+
+Here's a simple diagram to illustrate how data connectivity occurs in the client-server model:
+
+lua
+Copy code
+                                 +--------------+
+                                 |    Client    |
+                                 +--------------+
+                                        |
+                                        |
+                                        v
+                                 +--------------+
+                                 |    Server    |
+                                 +--------------+
+                                        |
+                                        |
+                                        v
+                                 +--------------+
+                                 |    Database  |
+                                 +--------------+
+c. Two ways in which a web server can be augmented to serve data to the client are:
+
+Caching: The web server can cache frequently requested data to reduce the number of requests to the database. This can help to improve performance and reduce server load.
+
+Load balancing: The web server can distribute requests across multiple servers to improve scalability and fault tolerance. This can help to ensure that the system can handle a large number of requests and can continue to operate even if one or more servers fail.
+
+
+
+
+Baladithya Balamurugan
+Q5 [4+1 = 5 points]. a. Pick any two apps/sites on your phone/table/laptop using which you access data, describe how your UI actions (eg. searching, or doing data filtering) might result in SQL, using one example for each app/site (so two examples total). 
+b. Assuming (like in 'a' above) that your app-driven-querying does turn into SQL, where would such conversion (ie. transformation from UI-based query to SQL) occur? 
+a.
+
+Example 1: Instagram
+
+UI Action: Searching for a user's profile
+SQL Query:
+sql
+Copy code
+SELECT * 
+FROM users
+WHERE username = 'example_user';
+Example 2: Amazon
+
+UI Action: Filtering search results by price range
+SQL Query:
+sql
+Copy code
+SELECT * 
+FROM products
+WHERE category = 'electronics'
+AND price BETWEEN 100 AND 500;
+b. The transformation from UI-based query to SQL would typically occur in the application's backend server. The server would receive the UI-based query from the client app, and use it to construct an equivalent SQL query to retrieve the relevant data from the database. The server would then send the retrieved data back to the client app for display to the user.
+
+
+
+
+Baladithya Balamurugan
+Q6 [2+2+1 = 5 points]. a. In 2PL for data access during transactions, what is the most important phase? Explain. b. In 2PL, when we release locks, if we release locks prematurely, what issue might that cause? How would we fix it? c. What issue might arise, when we do TM without locks? How would we fix it? 
+a. The most important phase in 2PL for data access during transactions is the growing phase, during which locks are acquired on the required data items before any modifications are made to them. This phase is critical to ensure that the transaction can execute without conflicting with other transactions that may also need to access the same data items.
+
+b. If locks are released prematurely in 2PL, it can cause a phenomenon known as "lost updates". This occurs when two or more transactions attempt to modify the same data item concurrently, leading to one transaction overwriting the changes made by another transaction. To fix this issue, locks should be held until the transaction completes or aborts.
+
+c. When performing transaction management (TM) without locks, there is a risk of conflicts between transactions that may access the same data items concurrently. This can result in inconsistencies in the data or incorrect results being returned. One way to fix this issue is to use a technique known as "optimistic concurrency control", which involves allowing transactions to proceed without locking the data, but checking for conflicts before committing the changes. If a conflict is detected, one of the transactions is rolled back and restarted.
+
+
+
+
+Baladithya Balamurugan
+Q7 [1+4 = 5 points]. a. Codd's relational operators for data processing, lead to 'closure'. Why is this advantageous? Illusrate. b. For these four data types, list an operation that does preserve closure, and one that does not: vector (eg with components x,y,z), matrix, complex number, color (with RGB components). 
+a. Codd's relational operators lead to closure, which means that the result of a query on a relation is also a relation of the same type. This is advantageous because it allows us to chain multiple relational operators together to perform complex data processing tasks. For example, we can apply a selection operator to a relation to filter out unwanted data, and then apply a projection operator to the resulting relation to retrieve only the desired attributes.
+
+b.
+
+Vector:
+Closure-preserving operation: Vector addition
+Non-closure-preserving operation: Scalar multiplication
+Matrix:
+Closure-preserving operation: Matrix addition
+Non-closure-preserving operation: Matrix inversion
+Complex number:
+Closure-preserving operation: Complex addition
+Non-closure-preserving operation: Complex division
+Color (with RGB components):
+Closure-preserving operation: Color addition
+Non-closure-preserving operation: Color subtraction
+
+
+
+Baladithya Balamurugan
+Q8 [2+2+1 = 5 points]. a. During 2PC in distributed transactions, the transaction coordinator might fail. How would we fix that? b. During 2PC, a non-coordinator site might fail partway (between phase 1 and phase 2) - how would we fix the problem (ie prevent bad transactions)? c. During 2PC, a a non-coordinator site might fail at the start (before phase 1) - how would we deal with that? 
+a. If the transaction coordinator fails during 2PC, we can use a backup coordinator to take over and complete the transaction. The backup coordinator should have all the necessary information to continue with the transaction.
+
+b. If a non-coordinator site fails partway through 2PC (between phase 1 and phase 2), we can use a timeout mechanism to detect the failure and abort the transaction if necessary. Each site should have a timer that starts when it sends its vote to the coordinator. If the site does not receive a decision from the coordinator before the timer expires, it assumes that the coordinator has failed and aborts the transaction.
+
+c. If a non-coordinator site fails at the start of 2PC (before phase 1), we can simply exclude it from the transaction. The coordinator can send a message to all sites to determine which ones are available to participate in the transaction. If a site does not respond, it is assumed to be unavailable and is not included in the transaction.
+
+
+
+
+Baladithya Balamurugan
+Q9 [1+2+2 = 5 points]. a. What are a couple of uses for 'computed columns'? b. Given a table with columns of sines and cosines (for 0 to 360 degrees, in increments of 1 degree), eg called COS and SIN, how would you verify the following formula/identity? 
+sin' t9 +cos' 0 =1 
+You don't need to write SQL, you can simply describe the steps. c. Given a table with a pair of columns called X and Y, containing (x,y) values from a scatterplot for example, how would you calculate the (Pearson) correlation coefficient [assuming that the relationship is linear]? Again, just describe the steps [no need for SQL]. 
+a. Computed columns are columns in a table whose values are automatically generated based on an expression or formula involving other columns in the same table. They can be used for various purposes such as generating summary statistics, deriving new columns, or validating data consistency.
+
+b. To verify the formula sin(t9) + cos(0) = 1 using a table with columns of sines and cosines (COS and SIN), we would follow these steps:
+
+Find the value of SIN for 9 degrees, i.e., SIN(9).
+Find the value of COS for 0 degrees, i.e., COS(0).
+Calculate the sum of SIN(9) and COS(0).
+Compare the result to 1.
+If the sum of SIN(9) and COS(0) is equal to 1, then the formula is verified.
+
+c. To calculate the Pearson correlation coefficient between columns X and Y in a table, we would follow these steps:
+
+Calculate the mean of X and Y, denoted by X̄ and Ȳ, respectively.
+Calculate the standard deviation of X and Y, denoted by Sx and Sy, respectively.
+Calculate the covariance between X and Y, denoted by Cov(X,Y).
+Calculate the Pearson correlation coefficient, denoted by r, using the formula:
+r = Cov(X,Y) / (Sx * Sy)
+
+If the resulting value of r is between -1 and 1, it represents the strength and direction of the linear relationship between X and Y.

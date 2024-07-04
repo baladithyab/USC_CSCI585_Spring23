@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+    <Document id="1">
+        <Style id="32">
+            <LineStyle id="33">
+                <color>ff0000ff</color>
+                <colorMode>normal</colorMode>
+                <width>5</width>
+            </LineStyle>
+            <PolyStyle id="34">
+                <color>55000000</color>
+                <colorMode>normal</colorMode>
+                <fill>1</fill>
+                <outline>1</outline>
+            </PolyStyle>
+        </Style>
+        <Style id="37">
+            <LineStyle id="38">
+                <color>ff00d7ff</color>
+                <colorMode>normal</colorMode>
+                <width>5</width>
+            </LineStyle>
+        </Style>
+        <Style id="41">
+            <LineStyle id="42">
+                <color>ff00d7ff</color>
+                <colorMode>normal</colorMode>
+                <width>5</width>
+            </LineStyle>
+        </Style>
+        <Style id="45">
+            <LineStyle id="46">
+                <color>ff00d7ff</color>
+                <colorMode>normal</colorMode>
+                <width>5</width>
+            </LineStyle>
+        </Style>
+        <Style id="49">
+            <LineStyle id="50">
+                <color>ff00d7ff</color>
+                <colorMode>normal</colorMode>
+                <width>5</width>
+            </LineStyle>
+        </Style>
+        <Placemark id="3">
+            <name>CCC1_Ohlone_Newark</name>
+            <Point id="2">
+                <coordinates>-122.0038279,37.51807089972222,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="5">
+            <name>CCC2_Ohlone_Fremont</name>
+            <Point id="4">
+                <coordinates>-121.91260732777778,37.528407219444446,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="7">
+            <name>GasStation1_Valero_Fremont</name>
+            <Point id="6">
+                <coordinates>-121.9885955,37.547944199999996,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="9">
+            <name>GasStation2_Arco_Livermore</name>
+            <Point id="8">
+                <coordinates>-121.72327423094444,37.71144104002778,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="11">
+            <name>Origin_Livermore</name>
+            <Point id="10">
+                <coordinates>-121.711,37.727,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="13">
+            <name>Mall1_NewPark_Newark</name>
+            <Point id="12">
+                <coordinates>-121.99994449972222,37.527973599999996,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="15">
+            <name>Mall2_SFPremiumOutlets_Livermore</name>
+            <Point id="14">
+                <coordinates>-121.84037929972222,37.69927129972222,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="17">
+            <name>NaturePark1_LakeElizabeth_Fremont</name>
+            <Point id="16">
+                <coordinates>-121.96317271944444,37.54530391944444,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="19">
+            <name>NaturePark2_PondPark_Newark</name>
+            <Point id="18">
+                <coordinates>-122.04985429999999,37.5246865,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="21">
+            <name>Restaurant1_HotPot_Newark</name>
+            <Point id="20">
+                <coordinates>-122.01785259972222,37.53787859972222,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="23">
+            <name>Restaurant2_TacoBell_Newark</name>
+            <Point id="22">
+                <coordinates>-122.0267891,37.5408052,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="25">
+            <name>Theater1_Century_Fremont</name>
+            <Point id="24">
+                <coordinates>-121.97040529972223,37.50048329972222,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="27">
+            <name>Theater2_Century_UnionCity</name>
+            <Point id="26">
+                <coordinates>-122.06788269972222,37.5997806,0.0</coordinates>
+            </Point>
+        </Placemark>
+        <Placemark id="29">
+            <name>Convex Hull</name>
+            <styleUrl>#32</styleUrl>
+            <Polygon id="28">
+                <outerBoundaryIs>
+                    <LinearRing id="30">
+                        <coordinates>-121.97040529972223,37.50048329972222,0.0 -122.04985429999999,37.5246865,0.0 -122.06788269972222,37.5997806,0.0 -121.84037929972222,37.69927129972222,0.0 -121.711,37.727,0.0 -121.72327423094444,37.71144104002778,0.0 -121.91260732777778,37.528407219444446,0.0 -121.97040529972223,37.50048329972222,0.0</coordinates>
+                    </LinearRing>
+                </outerBoundaryIs>
+            </Polygon>
+        </Placemark>
+        <Placemark id="36">
+            <name>Line(Origin_Livermore,GasStation2_Arco_Livermore)</name>
+            <styleUrl>#37</styleUrl>
+            <LineString id="35">
+                <coordinates>-121.711,37.727,0.0 -121.72327423094444,37.71144104002778,0.0</coordinates>
+            </LineString>
+        </Placemark>
+        <Placemark id="40">
+            <name>Line(Origin_Livermore,Mall2_SFPremiumOutlets_Livermore)</name>
+            <styleUrl>#41</styleUrl>
+            <LineString id="39">
+                <coordinates>-121.711,37.727,0.0 -121.84037929972222,37.69927129972222,0.0</coordinates>
+            </LineString>
+        </Placemark>
+        <Placemark id="44">
+            <name>Line(Origin_Livermore,CCC2_Ohlone_Fremont)</name>
+            <styleUrl>#45</styleUrl>
+            <LineString id="43">
+                <coordinates>-121.711,37.727,0.0 -121.91260732777778,37.528407219444446,0.0</coordinates>
+            </LineString>
+        </Placemark>
+        <Placemark id="48">
+            <name>Line(Origin_Livermore,NaturePark1_LakeElizabeth_Fremont)</name>
+            <styleUrl>#49</styleUrl>
+            <LineString id="47">
+                <coordinates>-121.711,37.727,0.0 -121.96317271944444,37.54530391944444,0.0</coordinates>
+            </LineString>
+        </Placemark>
+    </Document>
+</kml>

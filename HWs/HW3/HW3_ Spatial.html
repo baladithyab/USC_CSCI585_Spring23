@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!-- saved from url=(0057)https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/index.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+<link rel="shortcut icon" href="http://www.usc.edu/favicon.ico">
+<title style="font-size:60px;">
+HW3: Spatial
+</title>
+    <script src="./HW3_ Spatial_files/MathJax.js.download"></script><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style> 
+    <script>
+     //http://docs.mathjax.org/en/latest/model.html
+     MathJax.Hub.Config({
+      config: ["MMLorHTML.js"],
+      jax: ["input/AsciiMath","output/HTML-CSS","output/NativeMML", "output/CommonHTML"],
+      extensions: ["asciimath2jax.js"],
+     });
+    </script>
+
+<style>
+ pre {
+  font-size: 24px;
+ }
+</style>
+    
+<link href="./HW3_ Spatial_files/theme.css" rel="stylesheet"><link href="./HW3_ Spatial_files/theme.min.css" rel="stylesheet"><link href="./HW3_ Spatial_files/strapdown.css" rel="stylesheet"><link href="./HW3_ Spatial_files/bootstrap-responsive.min.css" rel="stylesheet"><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuTitle {background-color: #CCCCCC; margin: -1px -1px 1px -1px; text-align: center; font-style: italic; font-size: 80%; color: #444444; padding: 2px 0; overflow: hidden}
+.MathJax_MenuArrow {position: absolute; right: .5em; color: #666666}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-family: serif; font-size: 85%; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style></head>
+
+
+<body style=""><div id="MathJax_Message" style="display: none;"></div>
+
+<!-- Static navbar -->
+    <div class="navbar navbar-inverse">
+    </div><!-- navbar -->
+
+<!-- only ONE xmp section will render, so don't have multiples; ONLY customization is the 'theme' - look in 0.2/themes for alt names, eg. united (this came as the demo one), amelia, journal, readable -->
+<!-- what look good:
+* flatly - probably 2nd best..
+* cosmo - clean
+* readable - simple, pretty b/w, makes H1 ALL uppercase!!
+* simplex - tall and thin
+* slate: sort of like my 'forever' smartcg css!!
+* spacelab - clean, elegant, minimal, pretty - Becky's fav!
+* united - modern - probably the best :)
+* yeti - thinnish; yucky top-menu
+* cyborg - pretty but navbar can't be 'right'
+
+* bootstrap: chunky but good, no 'right' navbar
+* default: nice text but black menubar (not 'bad' though)
+-->
+
+<!-- Inside the xmp, *can* have classic md, html, links for such mixed markup), etc. -->
+
+<!-- ********************************** -->
+<div class="container" id="content"><!-- ********************************** -->
+
+<h4>&nbsp;</h4>
+<h2><b>HW3: Geospatial data handling</b></h2>
+<h3>Total points: 6</h3>
+<h3>In this homework, you are going to work with <b>spatial data</b> - you will collect/create (generate/sample) your own spatial data, visualize it, do queries on it, and visualize the query results.. <strong>Hope you have fun with this!</strong> Geospatial data handling is a <a href="https://www.gjc.org/">valuable skill!</a></h3>
+<h3>The exercise will give you a taste of working with spatial data, use of a spatial file format and spatial query functions, all of which are quite useful from a real-world (or job interview) perspective.</h3>
+<h3>What you need to do is described below in sufficient, but not too much, detail - you'd need to do a bit of reading up and experimenting, to fill in the gaps. Please post on Piazza, or talk to a TA/CP, or me, if you are unable to proceed at any point!</h3>
+<h3>1. You need to create (generate) longitude,latitude pairs (ie. spatial coordinates) for <b>12 locations</b> on the USC campus, in addition to where your <b>home/apartment/dorm room</b> is.</h3>
+<h3>The 12, other than your home, would have to be spread out - use your judgment, try to span the campus area, choose locations inside or outside, nearby - we don't want to cover a 'huge' region, or at the other extreme, have the points be 'too close'.</h3>
+<h3><strong>The 12 points do need to be as follows: two depts, from six schools.</strong> We have a lot of schools you can choose from - <a href="https://admission.usc.edu/schools/">https://admission.usc.edu/schools/</a> :)</h3>
+<h3>If you are not on campus (if you are a DEN student, live abroad/away from campus), feel free to substitute places around where you live, for the 12 points other than your <b>residence or work</b> (again, make sure they are not too close to each other or too far apart). You can pick six categories (eg. park, bike rack, coffee shop, museum, restaurant...), and get two locations for each.</h3>
+<h3>How would you obtain (lat,long) spatial coordinates at a location? By walking around!! Please do NOT click on <a href="https://www.google.com/maps">https://www.google.com/maps</a> to acquire your data! You need to submit a selfie of you [if you don't want to show your full face, that's ok, include just a part :)] at each location, to show that you were there. Bring up <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/geolocate_mod/geolocate_mod.html">this</a> page on your phone, it will display your location - write it down/type it up, along with the location's name; to get (long,lat), you can also your phone's compass, or a downloaded app.</h3>
+<h3>Make a simple (text/on paper) table of your long,lat locations and their names, 13 entries total, as a starting point for the analysis and viz you will be doing with them.</h3>
+<h3>2. Now that you have 13 coordinates and their label strings (ie. text descriptions such as "CS Dept", "BME"), you are going to create a KML file (.kml format, which is XML) out of them using a text editor. Specifically, each location will be a 'placemark' in your .kml file (with a label, and coords). <a href="https://developers.google.com/kml/documentation/kml_tut#placemarks">Here</a> is more detail. The .kml file with the 13 placemarks is going to be your starter file, for doing visualizations and queries. <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/data/starter_kml.xml">Here</a> is a .kml skeleton to get you started (just download, rename and edit it to put in your coords and labels). NOTE - keep your labels to be 15 characters or less (including spaces). <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/data/starter_kml.txt">Here</a> is the same .kml skeleton in .txt format, if you'd like to RMB save it instead and rename the file extension from .txt to .xml. NOTE too that in .kml, you specify (long,lat), instead of the expected (lat,long) [after all, longtitude is what corresponds to 'x', and latitude, to 'y']! Also, place your 12 coords (not your home one) in KML 'folders'.</h3>
+<h3>You are going to use Google Earth to visualize the data in your KML file (see #3 below). FYI, as a quick check, you can also visualize it using <a href="http://display-kml.appspot.com/">this</a> page - simply copy and paste your KML data into the textbox on the left, and click 'Show it on the map' to have it be displayed on a map on the right :) Or you can do a quick check at <a href="http://kmlviewer.nsspot.net/">http://kmlviewer.nsspot.net/</a> instead.</h3>
+<h3>3. <a href="https://www.google.com/earth/download/ge/agree.html">Download Google Earth</a> on your laptop, install it, bring it up. Load your .kml file into it - that should show you your  sampled locations, on Google Earth's globe :) Take a snapshot (screengrab) of this, for submitting.</h3>
+<h3>4. Install Oracle 11g+Oracle Spatial, or Postgres+PostGIS on your laptop, and browse the docs for the spatial functions and search for basic tutorials (eg. <a href="https://www.postgresqltutorial.com/postgresql-getting-started/">this</a> is a good one).</h3>
+<h3>Windows users: please <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/clips/inst_1.mp4">install</a> Postgres v.13.3 from <a href="https://www.enterprisedb.com/downloads/postgres-postgresql-downloads">here</a>, then <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/clips/inst_2.mp4">install</a> PostGIS v.3.1.2 after starting Postgres' Stack Builder UI. Mac users can do <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/Mac/index.html">this instead.</a></h3>
+<h3>After you install Postgres+PostGIS, <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/clips/queries.mp4">here</a> is how you can create a DB, create a table, insert data, query it.</h3>
+<h3>OR, you don't need to install your own copy of Postgres/PostGIS <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/pics/bit.io.postgis.png">at all</a> :) DO feel free to do the queries this way!</h3>
+<h3>5. You will use the spatial db software to execute the following two spatial queries that you'll write:</h3>
+<h4>• <strong>compute the convex hull</strong> for your 13 points [a <a href="http://mathworld.wolfram.com/ConvexHull.html">convex hull</a> for a set of 2D points is the smallest convex polygon that contains the point set]. If you use Oracle, see <a href="https://docs.oracle.com/cd/A97630_01/appdev.920/a96630/sdo_aggr.htm">this</a> page; if you decide to use Postgres, read <a href="http://postgis.net/docs/ST_ConvexHull.html">this</a> and <a href="http://stackoverflow.com/questions/10461179/k-nearest-neighbor-query-in-postgis">this</a> instead. Use the query's result polygon's coords, to  create a polygon in your .kml file (edit the .kml file, add relevant XML to specify the KML polygon's coords). Load this into Google Earth, visually verify that all your points are on/inside the convex hull, then take a screenshot. Note that even your data points happen to have a concave perimeter and/or happen to be self-intersecting, the convex hull, by definition, would be a tight, enclosing boundary (hull) that is a simple convex polygon. The convex hull is a very useful object - eg. see <a href="https://www.quora.com/What-are-the-real-life-applications-of-convex-hulls">this</a> discussion..  Note: be sure to specify your polygon's coords as '...-118,34 -118,34.1...' for example, and not '...-118, 34 -118, 34.1...' [in other words, do not separate long,lat with a space after the comma, ie it can't be long, lat].</h4>
+<h4>• <strong>compute the four nearest neighbors</strong> of your home/apt/dormroom location [look up the spatial function of your DB, to do this]. Use the query's results, to create four line segments in your .kml file: line(home,neighbor1), line(home,neighbor2), line(home,neighbor3), line(home,neighbor4). Verify this looks correct, using Google Earth, take a snapshot.</h4>
+<h3>Note - it *is* OK to hardcode points, in the above queries! Or, you can create and use a table to store your 13 points in it, then write queries against the table.</h3>
+<h3>6. Use OpenLayers (a JavaScript API) to visualize your location data. The idea is to store your 13 sampled points, via your web browser, in a browser cache area in your local machine, where the data would persist [even after you close the browser]; then you'd read back the stored values, and visualize them, using the OpenLayers API. To store and load points, you'll use 'HTML5 localStorage', which is a key-value based standard WWW <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage">API.</a></h3>
+<h3>The API calls are in JavaScript, which you would run via an html page, like so:</h3>
+<pre>&lt;!DOCTYPE html&gt;
+
+&lt;html&gt;
+
+&lt;head&gt;
+&lt;title&gt;OL&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+&lt;script&gt;
+// your JS code 
+alert("Hello JS World!");
+console.log("Hola, all!");
+&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</pre>
+
+<h3>If you create an html file [OL.html] and run it (in Chrome, preferably), you'd see this (in Chrome, to see the console, use the three-dots dropdown menu on the top right: More tools -&gt; Developer tools) :</h3>
+<p></p><p><img style="width:50%" src="./HW3_ Spatial_files/OL.png"></p>
+<h3>Now you're ready to store, retrieve, and plot your points!</h3>
+<h3>The code in this starter <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/OL/OL.html">OL.html</a> is to show you, roughly, how to do it; you'd need to do it 'for real' by modifying it :) EVEN IF you don't know JS or coding, don't worry - it's easy, and fun, to figure it out! In other words, start with the OL.html I'm giving you, mildly EDIT it to ADD IN your sampled locations, submit that [note: you <strong>do NOT</strong> have to do extensive JavaScript coding at all!]. The OL.html code is also <a href="https://bytes.usc.edu/~saty/tools/xem/run.html?x=OpenLayers">here</a> if you want to play with it; a 'v2' version is <a href="https://bytes.usc.edu/~saty/tools/xem/run.html?x=OpenLayers_v2">here.</a></h3>
+<h3>If you like, you can do the location visualization, using CodePen [<a href="https://codepen.io/">https://codepen.io/</a>] or jsfiddle [<a href="https://jsfiddle.net/">https://jsfiddle.net/</a>], and just submit a URL of your code - the grader would simply copy and paste your URL into their browser, and be able to see your code and the result. If you do this, submit a README file with your link, instead of submitting OL.html.</h3>
+<h3>7. Using Tommy Trojan as the center, <b>compute</b> (don't/can't use GPS!) a set (sequence) of lat-long (ie. spatial) co-ordinates that lie along a pretty <a href="https://www.google.com/search?q=Spirograph+curve&amp;num=100&amp;source=lnms&amp;tbm=isch"><b>Spirograph</b>™ curve</a> :)</h3>
+<h3>If you are on campus, you can go visit TT to get his (long,lat); otherwise, please long-press (for just under a second) on him in <a href="https://www.google.com/maps">https://www.google.com/maps</a>, that will make his coords pop up in a little box.</h3>
+<h3>Create a new KML file with Spirograph curve points [see below], convert the KML to an ESRI 'shapefile', visualize the shapefile data using ArcGIS Online.</h3>
+<h3>To convert your .kml into a shapefile, use this online converter: <a href="https://mygeodata.cloud/converter/kml-to-shp">https://mygeodata.cloud/converter/kml-to-shp</a> - the result will be a .zip [which is what we call 'shapefile'], which will contain within it, shape data (.shp), a relational table (.dbf), and other optional files (.shx, .prj, .cpg). <a href="http://desktop.arcgis.com/en/arcmap/10.3/manage-data/shapefiles/what-is-a-shapefile.htm">Here</a> is a page on shapefiles, and <a href="http://desktop.arcgis.com/en/arcmap/10.3/manage-data/shapefiles/shapefile-file-extensions.htm">this</a> talks about the various components (.shp, .dbf etc) of a shapefile.</h3>
+<h3>Once you have your shapefile, you can upload it to ArcGIS' online map creator to view your Spirograph curve-shaped points. To do so, log on  to ArcGIS [after creating a free 'public' account], at <a href="https://www.arcgis.com/">https://www.arcgis.com/</a>, then use the 'Map' tab - <a href="https://www.arcgis.com/home/webmap/viewer.html?useExisting=1">https://www.arcgis.com/home/webmap/viewer.html?useExisting=1</a>. Do 'Add -&gt; Add Layer from File', and upload your shapefile .zip, you should see your data overlaid on a map. <a href="https://bytes.usc.edu/cs585/s23-da-taaa/hw/HW3/pics/ArcGIS_spiro.png">Here</a> is a screenshot of roughly what to expect.</h3>
+<h3>What if your shapefile is too large, and you get a 'Dataset too large' error while using ArcGIS? In that case, you can import your shapefile into <a href="https://maps.equatorstudios.com/">https://maps.equatorstudios.com/</a> instead, and create a screenshot (this site will handle large shapefiles).</h3>
+<h3>For the Spirograph curve point creation, use the following parametric equations (with R=6, r=1, a=8):</h3>
+<pre style="font-size:medium;">x(t) = (R+r)*cos((r/R)*t) - a*cos((1+r/R)*t)
+y(t) = (R+r)*sin((r/R)*t) - a*sin((1+r/R)*t)
+</pre>
+
+<h3>Using the above equations, loop through t from 0.00 to n*Pi (eg. 2*Pi; note that 'n' might need to be more than 2, for the curve to close on itself; and, t is in radians, not degrees), in steps of 0.01. That will give you the sequence of (x,y) points that make up the Spiro curve, which would/should look like the curve in the screengrab below, when R=6, r=1, a=8:</h3>
+<h3><img style="border: 1px solid #AAAAAA; width:25%;" src="./HW3_ Spatial_files/spiro.png"></h3>
+<h3>Note - your figure MUST resemble the above, ie. it MUST have 6 loops - so please do not change R, r or a!</h3>
+<h3>In order to center the Spirograph at a given location [TT or other], you need to ADD each (x,y) curve point to the (lat,long) of the centering location - that will give you valid Spiro-based spatial coords for use in your .kml file [note that it means, in actuality, you're adding your location's (long,lat) to the computed curve's (y,x)]. You can use any coding language you want, to generate (and visualize) the curve's coords: JavaScript, C/C++, Java, Python, <a href="https://docs.oracle.com/cd/B28359_01/server.111/b28285/sqlqr02.htm">SQL</a>, MATLAB, Scala, Haskell, Ruby, R.. You can also use Excel, SAS, SPSS, JMP etc., for computing [and plotting, if you want to check the results visually] the Spirograph curve points. <a href="https://bytes.usc.edu/~saty/tools/xem/run.html?x=canvSpiro">This</a> can help you a lot :)</h3>
+<h3>Payoff - when you do this in KML, what you'll see is the Spirograph curve superposed on the land imagery - pretty!</h3>
+<h3>PS: <a href="https://www.google.com/search?q=Spirograph+curve&amp;ie=utf-8&amp;oe=utf-8">Here</a> is MUCH more on Spirograph (hypocycloid and epicycloid) curves if you are curious. Also, for fun, try changing any of R, r, a in the code for the equations above [you don't need to submit the results]!</h3>
+<div style="height:1px;border:1px solid black;"></div>
+
+<h3>Here is what you need to <strong>submit</strong> (<b>as a single .zip file</b>):</h3>
+<h4>* 13 selfies, from step 1 above [if you don't submit these, you will LOSE 2 points!]</h4>
+<h4>* your .kml file from step 5 above - with the placemarks, convex hull and nearest-neighbor line segments (<strong>1 point</strong>)</h4>
+<h4>* a text file (.txt or .sql) with your two queries from step 5 - table creation commands (if you use Postgres and directly specify points in your queries, you won't have table creation commands, in which case you wouldn't need to worry about this part), and the queries themselves (<strong>2 points</strong>)</h4>
+<h4>* screengrabs from steps 3,5  (<strong>1 point</strong>)</h4>
+<h4>* a .html file (with the OpenLayers code) from step 6, or a CodePen/jsfiddle link (<strong>1 point</strong>)</h4>
+<h4>* your Spirograph point generation code, the resulting .kml file ("spiro.kml"), shapefile (this needs to be a .zip) and a screenshot (<strong>1 point</strong>)</h4>
+<div style="height:1px;border:1px solid #AAAAAA;"></div>
+
+
+<h3>HAVE FUN! From here on out, you know how to create custom overlays (via KML files containing vector symbols constructed from points, lines and polygons, and its shapefile equivalent) on a map, and perform spatial queries on the underlying data. This can even be the basis for <a href="https://www.indeed.com/q-Arcgis-jobs.html">a career</a> :)</h3>
+<div style="height:1px;border:1px solid black;"></div>
+<div style="height:1px;border:1px solid black;"></div>
+
+
+
+
+
+<!-- ********************************** -->
+</div>
+<!-- ********************************** -->
+
+
+
+
+<!-- DO NOT MODIFY WHAT'S BELOW - IT RENDERS THE MD THAT IS ABOVE! -->
+<script>
+ var markdownEl = document.getElementsByTagName('xmp')[0]  || document.getElementsByTagName('textarea')[0];
+   var theme = markdownEl.getAttribute('theme') || 'moi.min';
+   theme = theme.toLowerCase();
+  // alert(theme);
+  var originBase = "../../res";
+   var linkEl = document.createElement('link');
+   linkEl.href = originBase + '/themes/'+theme+'.css';
+   linkEl.rel = 'stylesheet';
+   document.head.appendChild(linkEl);
+</script>
+<script src="./HW3_ Spatial_files/strapdown.js.download"></script>
+
+
+
+
+
+
+
+</body></html>

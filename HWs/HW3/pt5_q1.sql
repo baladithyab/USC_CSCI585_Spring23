@@ -1,0 +1,2 @@
+SELECT ST_AsText(ST_ConvexHull(ST_Collect(geom)))
+        FROM locations;

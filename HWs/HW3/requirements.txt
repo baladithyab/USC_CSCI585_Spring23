@@ -1,0 +1,7 @@
+GPSPhoto
+simplekml
+fastkml
+piexif
+exifread
+playwright
+psycopg2-binary
