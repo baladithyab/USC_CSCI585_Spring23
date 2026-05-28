@@ -83,7 +83,7 @@
   <body>
     <header>
       <h1>Bay Area Photo Spatial Queries</h1>
-      <p>13 geotagged Bay Area photos. Toggle convex hull, click anywhere to find the 4 nearest. Same dataset and queries as the HW3 PostGIS exercise — but client-side via turf.js, no server.</p>
+      <p>13 geotagged Bay Area POIs from the original photos.kml — community colleges, gas stations, malls, parks, restaurants, theaters. <strong>Click a node to see its category, address, and Street View link.</strong> Click anywhere else on the map to find the 4 nearest. Toggle the convex hull and density layers via the panel. Same dataset and queries as the HW3 PostGIS exercise — but client-side via turf.js, no server.</p>
     </header>
     <div class="layout">
       <aside class="controls">
@@ -121,24 +121,57 @@
     <script src="https://unpkg.com/@turf/turf@7.1.0/turf.min.js"></script>
     <script type="module">
       const $ = (id) => document.getElementById(id)
+      // Photos dataset from HW3/photos.kml. Each entry has the original
+      // KML name (categorized like "GasStation1_Valero_Fremont"), parsed
+      // category/specific/city pieces, and lng/lat. We use these to
+      // render meaningful popups when a node is clicked.
       const photos = [
-        { lng: -122.0038279, lat: 37.51807089972222 },
-        { lng: -121.91260732777778, lat: 37.528407219444446 },
-        { lng: -121.9885955, lat: 37.547944199999996 },
-        { lng: -121.72327423094444, lat: 37.71144104002778 },
-        { lng: -121.7113427, lat: 37.727160599722225 },
-        { lng: -121.99994449972222, lat: 37.527973599999996 },
-        { lng: -121.84037929972222, lat: 37.69927129972222 },
-        { lng: -121.96317271944444, lat: 37.54530391944444 },
-        { lng: -122.04985429999999, lat: 37.5246865 },
-        { lng: -122.01785259972222, lat: 37.53787859972222 },
-        { lng: -122.0267891, lat: 37.5408052 },
-        { lng: -121.97040529972223, lat: 37.50048329972222 },
-        { lng: -122.06788269972222, lat: 37.5997806 },
+        { name: 'CCC1_Ohlone_Newark',                 lng: -122.0038279,             lat: 37.51807089972222 },
+        { name: 'CCC2_Ohlone_Fremont',                lng: -121.91260732777778,      lat: 37.528407219444446 },
+        { name: 'GasStation1_Valero_Fremont',         lng: -121.9885955,             lat: 37.547944199999996 },
+        { name: 'GasStation2_Arco_Livermore',         lng: -121.72327423094444,      lat: 37.71144104002778 },
+        { name: 'Origin_Livermore',                   lng: -121.7113427,             lat: 37.727160599722225 },
+        { name: 'Mall1_NewPark_Newark',               lng: -121.99994449972222,      lat: 37.527973599999996 },
+        { name: 'Mall2_SFPremiumOutlets_Livermore',   lng: -121.84037929972222,      lat: 37.69927129972222 },
+        { name: 'NaturePark1_LakeElizabeth_Fremont',  lng: -121.96317271944444,      lat: 37.54530391944444 },
+        { name: 'NaturePark2_PondPark_Newark',        lng: -122.04985429999999,      lat: 37.5246865 },
+        { name: 'Restaurant1_HotPot_Newark',          lng: -122.01785259972222,      lat: 37.53787859972222 },
+        { name: 'Restaurant2_TacoBell_Newark',        lng: -122.0267891,              lat: 37.5408052 },
+        { name: 'Theater1_Century_Fremont',           lng: -121.97040529972223,      lat: 37.50048329972222 },
+        { name: 'Theater2_Century_UnionCity',         lng: -122.06788269972222,      lat: 37.5997806 },
       ]
 
+      // ---- category metadata --------------------------------------
+      // Category-symbol + label-color mappings keyed off the KML name
+      // prefix. Used in the popup that opens when a node is clicked.
+      const categoryMeta = {
+        CCC:         { icon: '🎓', label: 'Community College',  color: '#1d4ed8' },
+        GasStation:  { icon: '⛽', label: 'Gas Station',         color: '#dc2626' },
+        Origin:      { icon: '📍', label: 'Origin point',        color: '#0f172a' },
+        Mall:        { icon: '🛍️', label: 'Mall',                color: '#a16207' },
+        NaturePark:  { icon: '🌳', label: 'Nature Park',         color: '#15803d' },
+        Restaurant:  { icon: '🍴', label: 'Restaurant',          color: '#9333ea' },
+        Theater:     { icon: '🎬', label: 'Movie Theater',       color: '#be185d' },
+      }
+      function parsePoiName(name) {
+        // Split "GasStation2_Valero_Fremont" → category 'GasStation',
+        // specific 'Valero', city 'Fremont'.
+        const m = name.match(/^([A-Za-z]+?)(\d*)_([^_]+)_(.+)$/)
+        if (!m) return { category: 'Unknown', number: '', specific: name, city: '' }
+        return { category: m[1], number: m[2], specific: m[3], city: m[4] }
+      }
+      function poiMeta(name) {
+        const parsed = parsePoiName(name)
+        const meta = categoryMeta[parsed.category] || { icon: '📍', label: parsed.category, color: '#71717a' }
+        return { ...parsed, ...meta }
+      }
+
       const photoFC = turf.featureCollection(
-        photos.map((p, i) => turf.point([p.lng, p.lat], { id: i, label: `photo${i + 1}` })),
+        photos.map((p, i) => turf.point([p.lng, p.lat], {
+          id: i,
+          name: p.name,
+          label: `photo${i + 1}`,
+        })),
       )
       const hull = turf.convex(photoFC)
       const bbox = turf.bbox(photoFC)
@@ -251,6 +284,65 @@
         $('stat-bbox').textContent =
           `${bbox[0].toFixed(3)}, ${bbox[1].toFixed(3)} → ${bbox[2].toFixed(3)}, ${bbox[3].toFixed(3)}`
 
+        // Show pointer cursor when hovering a node so users know it's clickable.
+        map.on('mouseenter', 'photos-circle', () => map.getCanvas().style.cursor = 'pointer')
+        map.on('mouseleave', 'photos-circle', () => map.getCanvas().style.cursor = '')
+
+        // Click on a node → popup with category, name, city, coords + map links.
+        // We register this BEFORE the global click handler so it fires first on
+        // node hits. We also stop propagation so the global handler's NN query
+        // doesn't run when the click was actually on a node.
+        map.on('click', 'photos-circle', (e) => {
+          if (!e.features || e.features.length === 0) return
+          const f = e.features[0]
+          const meta = poiMeta(f.properties.name)
+          const [lng, lat] = f.geometry.coordinates
+          const osmUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=18/${lat}/${lng}`
+          const streetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`
+          const gmapsSearch = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meta.specific + ' ' + meta.city)}`
+
+          const html = `
+            <div style="font: 12px/1.4 system-ui; max-width: 240px;">
+              <div style="font-size: 22px;">${meta.icon}</div>
+              <div style="font-weight: 600; color: ${meta.color}; margin-top: 2px;">${meta.label}${meta.number ? ' #' + meta.number : ''}</div>
+              <div style="font-size: 13px; margin-top: 2px;">${meta.specific.replace(/([A-Z])/g, ' $1').trim()}</div>
+              <div style="color: #555; font-size: 11px;">${meta.city}, CA</div>
+              <div style="font-family: ui-monospace, monospace; font-size: 10px; color: #777; margin-top: 4px;">
+                ${lat.toFixed(4)}, ${lng.toFixed(4)}
+              </div>
+              <div style="font-size: 10px; color: #777; margin-top: 2px;">
+                <span style="font-weight: 600;">KML name:</span> <code style="background: #f4f4f5; padding: 0 3px; border-radius: 2px;">${f.properties.name}</code>
+              </div>
+              <div style="margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap;">
+                <a href="${osmUrl}" target="_blank" rel="noopener"
+                   style="padding: 3px 6px; background: #1d4ed8; color: white; text-decoration: none; border-radius: 3px; font-size: 11px;">
+                  OpenStreetMap
+                </a>
+                <a href="${streetView}" target="_blank" rel="noopener"
+                   style="padding: 3px 6px; background: #15803d; color: white; text-decoration: none; border-radius: 3px; font-size: 11px;">
+                  Street View
+                </a>
+                <a href="${gmapsSearch}" target="_blank" rel="noopener"
+                   style="padding: 3px 6px; background: #71717a; color: white; text-decoration: none; border-radius: 3px; font-size: 11px;">
+                  Search
+                </a>
+              </div>
+              <div style="margin-top: 6px; font-size: 9px; color: #a1a1aa; line-height: 1.3;">
+                The original CSCI 585 HW3 collected geotagged photos at each
+                of these locations. The photos themselves aren't redistributed
+                here, but the geometry and the category labels are: open the
+                location in Street View to see what it looks like today.
+              </div>
+            </div>`
+          new maplibregl.Popup({ closeButton: true, maxWidth: '280px' })
+            .setLngLat(e.lngLat)
+            .setHTML(html)
+            .addTo(map)
+          // Prevent the global click handler (NN search) from also firing.
+          e.preventDefault?.()
+          e.originalEvent?.stopPropagation?.()
+        })
+
         // Map click → 4-nearest-neighbor query
         map.on('click', (e) => {
           if (e.defaultPrevented) return
@@ -279,7 +371,10 @@
           ])
           map.getSource('photos').setData(flagged)
           $('nn-result').innerHTML = top4
-            .map((r) => `<div>${r.feature.properties.label} — ${r.distKm.toFixed(2)} km</div>`)
+            .map((r) => {
+              const m = poiMeta(r.feature.properties.name)
+              return `<div>${m.icon} ${m.specific.replace(/([A-Z])/g, ' $1').trim()} — ${r.distKm.toFixed(2)} km</div>`
+            })
             .join('')
         })
       })
