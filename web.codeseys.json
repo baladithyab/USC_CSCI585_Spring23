@@ -47,5 +47,10 @@
   "build": {
     "ci": true,
     "workflow": ".github/workflows/build-web-asset.yml"
+  },
+  "delivery": {
+    "url": "https://assets-r2.codeseys.io/csci-585/c150d37/",
+    "version": "c150d37",
+    "sizeBytes": 38086
   }
 }
