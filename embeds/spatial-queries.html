@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light only" />
+    <title>Bay Area Photo Spatial Queries — CSCI 585 HW3</title>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+    <style>
+      :root {
+        --text: #111827;
+        --muted: #6b7280;
+        --accent: #3b82f6;
+        --bg: #fafafa;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; height: 100%; }
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      header {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: white;
+      }
+      header h1 { margin: 0 0 0.125rem; font-size: 1rem; font-weight: 600; }
+      header p { margin: 0; font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+      .layout { flex: 1; display: flex; min-height: 0; }
+      .controls {
+        width: 240px;
+        padding: 0.875rem;
+        background: white;
+        border-right: 1px solid #e5e7eb;
+        overflow-y: auto;
+      }
+      .controls h2 {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin: 0 0 0.5rem;
+      }
+      .controls label { display: block; font-size: 0.8125rem; margin-bottom: 0.5rem; cursor: pointer; }
+      .controls input[type='checkbox'] { margin-right: 0.5rem; vertical-align: middle; }
+      .controls .field { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f3f4f6; }
+      .controls .field:last-child { border-bottom: 0; }
+      .controls .info {
+        font-size: 0.6875rem;
+        color: var(--muted);
+        line-height: 1.5;
+        font-family: ui-monospace, monospace;
+      }
+      .map-wrap { flex: 1; position: relative; }
+      #map { width: 100%; height: 100%; }
+      .legend {
+        position: absolute;
+        bottom: 0.875rem;
+        left: 0.875rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.5rem 0.625rem;
+        border-radius: 0.375rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        font-size: 0.6875rem;
+        line-height: 1.7;
+      }
+      .legend-item { display: flex; align-items: center; gap: 0.375rem; }
+      .legend-swatch { width: 0.75rem; height: 0.75rem; border-radius: 50%; }
+      .pulse {
+        animation: pulse 1s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Bay Area Photo Spatial Queries</h1>
+      <p>13 geotagged Bay Area photos. Toggle convex hull, click anywhere to find the 4 nearest. Same dataset and queries as the HW3 PostGIS exercise — but client-side via turf.js, no server.</p>
+    </header>
+    <div class="layout">
+      <aside class="controls">
+        <div class="field">
+          <h2>Spatial Layers</h2>
+          <label><input id="layer-points" type="checkbox" checked /> Photo locations</label>
+          <label><input id="layer-hull" type="checkbox" /> Convex hull</label>
+          <label><input id="layer-density" type="checkbox" /> Density (KDE)</label>
+        </div>
+        <div class="field">
+          <h2>4-Nearest-Neighbor</h2>
+          <p class="info" style="margin-top: 0">Click anywhere on the map to find the 4 closest photos.</p>
+          <div id="nn-result" class="info" style="margin-top: 0.5rem"></div>
+        </div>
+        <div class="field">
+          <h2>Stats</h2>
+          <p class="info">
+            Photos: <strong id="stat-count">13</strong><br />
+            Hull area: <strong id="stat-hull">—</strong><br />
+            Bounding box: <strong id="stat-bbox" style="font-size: 0.625rem">—</strong>
+          </p>
+        </div>
+      </aside>
+      <div class="map-wrap">
+        <div id="map"></div>
+        <div class="legend">
+          <div class="legend-item"><span class="legend-swatch" style="background:#3b82f6"></span> Photo</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#dc2626"></span> Click point</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#059669"></span> Nearest neighbor</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/@turf/turf@7.1.0/turf.min.js"></script>
+    <script type="module">
+      const $ = (id) => document.getElementById(id)
+      const photos = [
+        { lng: -122.0038279, lat: 37.51807089972222 },
+        { lng: -121.91260732777778, lat: 37.528407219444446 },
+        { lng: -121.9885955, lat: 37.547944199999996 },
+        { lng: -121.72327423094444, lat: 37.71144104002778 },
+        { lng: -121.7113427, lat: 37.727160599722225 },
+        { lng: -121.99994449972222, lat: 37.527973599999996 },
+        { lng: -121.84037929972222, lat: 37.69927129972222 },
+        { lng: -121.96317271944444, lat: 37.54530391944444 },
+        { lng: -122.04985429999999, lat: 37.5246865 },
+        { lng: -122.01785259972222, lat: 37.53787859972222 },
+        { lng: -122.0267891, lat: 37.5408052 },
+        { lng: -121.97040529972223, lat: 37.50048329972222 },
+        { lng: -122.06788269972222, lat: 37.5997806 },
+      ]
+
+      const photoFC = turf.featureCollection(
+        photos.map((p, i) => turf.point([p.lng, p.lat], { id: i, label: `photo${i + 1}` })),
+      )
+      const hull = turf.convex(photoFC)
+      const bbox = turf.bbox(photoFC)
+
+      // Initialize map.
+      // Using a free style — protomaps' demo-style for OSM works without
+      // an API key. If it ever rate-limits, swap to MapLibre's empty
+      // style + raster fallback.
+      const map = new maplibregl.Map({
+        container: 'map',
+        style: {
+          version: 8,
+          sources: {
+            osm: {
+              type: 'raster',
+              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+              tileSize: 256,
+              attribution: '© OpenStreetMap contributors',
+            },
+          },
+          layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
+        },
+        bounds: bbox,
+        fitBoundsOptions: { padding: 60 },
+      })
+
+      let nearestIds = new Set()
+      let clickPoint = null
+
+      map.on('load', () => {
+        // Photo points layer
+        map.addSource('photos', { type: 'geojson', data: photoFC })
+        map.addLayer({
+          id: 'photos-circle',
+          type: 'circle',
+          source: 'photos',
+          paint: {
+            'circle-radius': 6,
+            'circle-color': [
+              'case',
+              ['boolean', ['feature-state', 'nearest'], false], '#059669',
+              '#3b82f6',
+            ],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': 'white',
+          },
+        })
+
+        // Hull layer (hidden by default)
+        if (hull) {
+          map.addSource('hull', { type: 'geojson', data: hull })
+          map.addLayer({
+            id: 'hull-fill',
+            type: 'fill',
+            source: 'hull',
+            paint: { 'fill-color': '#a78bfa', 'fill-opacity': 0.18 },
+            layout: { visibility: 'none' },
+          })
+          map.addLayer({
+            id: 'hull-line',
+            type: 'line',
+            source: 'hull',
+            paint: { 'line-color': '#7c3aed', 'line-width': 2 },
+            layout: { visibility: 'none' },
+          })
+          $('stat-hull').textContent = (turf.area(hull) / 1_000_000).toFixed(1) + ' km²'
+        }
+
+        // Density (KDE) — turf supports basic gridded kernel density.
+        const cellSize = 0.5 // km
+        const isoBuckets = turf.pointGrid([
+          bbox[0] - 0.05, bbox[1] - 0.05, bbox[2] + 0.05, bbox[3] + 0.05,
+        ], cellSize, { units: 'kilometers' })
+        for (const f of isoBuckets.features) {
+          let total = 0
+          for (const p of photoFC.features) {
+            const d = turf.distance(f, p, { units: 'kilometers' })
+            total += Math.exp(-(d * d) / 2) // gaussian
+          }
+          f.properties.density = total
+        }
+        map.addSource('density', { type: 'geojson', data: isoBuckets })
+        map.addLayer({
+          id: 'density-circle',
+          type: 'circle',
+          source: 'density',
+          paint: {
+            'circle-radius': 8,
+            'circle-color': [
+              'interpolate', ['linear'], ['get', 'density'],
+              0, 'rgba(245,158,11,0)',
+              0.5, 'rgba(245,158,11,0.15)',
+              1.5, 'rgba(245,158,11,0.4)',
+              4, 'rgba(245,158,11,0.7)',
+            ],
+            'circle-blur': 0.6,
+          },
+          layout: { visibility: 'none' },
+        }, 'photos-circle')
+
+        // Click point layer
+        map.addSource('click', { type: 'geojson', data: turf.featureCollection([]) })
+        map.addLayer({
+          id: 'click-point',
+          type: 'circle',
+          source: 'click',
+          paint: { 'circle-radius': 7, 'circle-color': '#dc2626', 'circle-stroke-width': 2, 'circle-stroke-color': 'white' },
+        })
+
+        $('stat-bbox').textContent =
+          `${bbox[0].toFixed(3)}, ${bbox[1].toFixed(3)} → ${bbox[2].toFixed(3)}, ${bbox[3].toFixed(3)}`
+
+        // Map click → 4-nearest-neighbor query
+        map.on('click', (e) => {
+          if (e.defaultPrevented) return
+          const click = turf.point([e.lngLat.lng, e.lngLat.lat])
+          clickPoint = click
+          map.getSource('click').setData(turf.featureCollection([click]))
+          // Compute distance to each photo, sort, take top 4.
+          const ranked = photoFC.features
+            .map((f) => ({ feature: f, distKm: turf.distance(click, f, { units: 'kilometers' }) }))
+            .sort((a, b) => a.distKm - b.distKm)
+          const top4 = ranked.slice(0, 4)
+          // Update feature-state for nearest highlight
+          for (const f of photoFC.features) map.removeFeatureState({ source: 'photos', id: f.properties.id })
+          // (maplibre needs source-promoted ids; fall back to re-paint via a filter expression)
+          // Simpler: rebuild source data with a flag.
+          const flagged = turf.featureCollection(
+            photoFC.features.map((f) => {
+              const isNN = top4.some((t) => t.feature.properties.id === f.properties.id)
+              return turf.point(f.geometry.coordinates, { ...f.properties, nn: isNN })
+            }),
+          )
+          map.setPaintProperty('photos-circle', 'circle-color', [
+            'case',
+            ['boolean', ['get', 'nn'], false], '#059669',
+            '#3b82f6',
+          ])
+          map.getSource('photos').setData(flagged)
+          $('nn-result').innerHTML = top4
+            .map((r) => `<div>${r.feature.properties.label} — ${r.distKm.toFixed(2)} km</div>`)
+            .join('')
+        })
+      })
+
+      // Layer toggles
+      $('layer-points').addEventListener('change', (e) => {
+        map.setLayoutProperty('photos-circle', 'visibility', e.target.checked ? 'visible' : 'none')
+      })
+      $('layer-hull').addEventListener('change', (e) => {
+        const v = e.target.checked ? 'visible' : 'none'
+        map.setLayoutProperty('hull-fill', 'visibility', v)
+        map.setLayoutProperty('hull-line', 'visibility', v)
+      })
+      $('layer-density').addEventListener('change', (e) => {
+        map.setLayoutProperty('density-circle', 'visibility', e.target.checked ? 'visible' : 'none')
+      })
+    </script>
+  </body>
+</html>

@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light only" />
+    <title>YouTube SQL Schema (PGlite) — CSCI 585 HW2</title>
+    <style>
+      :root {
+        --bg: #fafafa;
+        --text: #111827;
+        --muted: #6b7280;
+        --accent: #3b82f6;
+        --code-bg: #1e293b;
+        --code-text: #e2e8f0;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; height: 100%; }
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      header {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: white;
+      }
+      header h1 { margin: 0 0 0.125rem; font-size: 1rem; font-weight: 600; }
+      header p { margin: 0; font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+      .layout { flex: 1; display: grid; grid-template-columns: 220px 1fr; min-height: 0; }
+      .sidebar {
+        padding: 0.875rem;
+        background: white;
+        border-right: 1px solid #e5e7eb;
+        overflow-y: auto;
+        font-size: 0.8125rem;
+      }
+      .sidebar h2 {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin: 0 0 0.5rem;
+      }
+      .sidebar button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.625rem;
+        font-size: 0.75rem;
+        font-family: inherit;
+        margin-bottom: 0.375rem;
+        cursor: pointer;
+        line-height: 1.4;
+      }
+      .sidebar button:hover { background: #f3f4f6; border-color: #d1d5db; }
+      .sidebar button.active { background: #eff6ff; border-color: var(--accent); color: var(--accent); }
+      .sidebar .field { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f3f4f6; }
+      .main {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .editor-wrap {
+        background: var(--code-bg);
+        color: var(--code-text);
+        padding: 0.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        flex: 0 0 auto;
+        max-height: 40%;
+        display: flex;
+        flex-direction: column;
+      }
+      .editor-toolbar {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+      .editor-toolbar button {
+        background: var(--accent);
+        color: white;
+        border: 0;
+        padding: 0.4rem 0.875rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .editor-toolbar button:hover { background: #2563eb; }
+      .editor-toolbar button[disabled] { opacity: 0.5; cursor: not-allowed; }
+      .editor-toolbar .status { color: #94a3b8; font-size: 0.75rem; font-family: ui-monospace, monospace; }
+      .editor-toolbar .label { color: #94a3b8; font-size: 0.6875rem; font-family: ui-monospace, monospace; flex: 1; }
+      textarea {
+        flex: 1;
+        min-height: 100px;
+        background: var(--code-bg);
+        color: var(--code-text);
+        border: 1px solid #334155;
+        border-radius: 0.375rem;
+        padding: 0.625rem;
+        font-family: ui-monospace, monospace;
+        font-size: 0.75rem;
+        line-height: 1.6;
+        resize: vertical;
+      }
+      .results {
+        flex: 1;
+        background: white;
+        overflow: auto;
+        padding: 0.875rem;
+        font-size: 0.75rem;
+      }
+      .results pre {
+        margin: 0;
+        font-family: ui-monospace, monospace;
+        font-size: 0.6875rem;
+        line-height: 1.5;
+      }
+      table { border-collapse: collapse; width: 100%; }
+      table th, table td {
+        text-align: left;
+        padding: 0.375rem 0.625rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-family: ui-monospace, monospace;
+        font-size: 0.6875rem;
+      }
+      table th {
+        background: #f8fafc;
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        font-size: 0.625rem;
+        position: sticky;
+        top: 0;
+      }
+      .err {
+        color: #dc2626;
+        font-family: ui-monospace, monospace;
+        white-space: pre-wrap;
+        font-size: 0.75rem;
+        padding: 0.5rem;
+        background: #fef2f2;
+        border-radius: 0.375rem;
+      }
+      .meta { color: var(--muted); margin-bottom: 0.5rem; }
+      .description {
+        background: #fffbeb;
+        border-left: 3px solid #f59e0b;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        margin-bottom: 0.75rem;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>YouTube Database — Live PostgreSQL in your browser</h1>
+      <p>HW2's 7-table relational schema running on <a href="https://github.com/electric-sql/pglite" target="_blank" rel="noopener">PGlite</a> (real Postgres compiled to WASM). Pick a query, hit Run, see the result. The database is seeded with synthetic data on first load.</p>
+    </header>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="field">
+          <h2>Schema</h2>
+          <button data-script="show-schema">Show CREATE TABLE</button>
+          <button data-script="seed">Re-seed data</button>
+          <button data-script="describe">List tables + counts</button>
+        </div>
+        <div class="field">
+          <h2>HW2 Queries</h2>
+          <button data-query="q1">Q1 — Top sponsor by spend</button>
+          <button data-query="q2">Q2 — Marvel like-ratios</button>
+          <button data-query="q3">Q3 — Channels w/ ≥100 paid subs</button>
+          <button data-query="q4">Q4 — Avg sentiment by keyword</button>
+          <button data-query="q5">Q5 — Taylor Swift viewer ages</button>
+          <button data-query="q6">Q6 — US weekly creators</button>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="editor-wrap">
+          <div class="editor-toolbar">
+            <button id="run-btn">Run</button>
+            <span class="label" id="active-label">— pick a query —</span>
+            <span class="status" id="status">Booting PGlite…</span>
+          </div>
+          <textarea id="sql" spellcheck="false" placeholder="SELECT 1;"></textarea>
+        </div>
+        <div class="results" id="results">
+          <p class="meta">Click any query button on the left, then hit Run. Or paste your own SQL in the editor.</p>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import { PGlite } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite@0.2.16/dist/index.js'
+
+      const $ = (id) => document.getElementById(id)
+      const status = $('status')
+      const results = $('results')
+
+      // Schema + sample data are baked in to keep the embed self-contained.
+      // Declared BEFORE the top-level await/boot block so seedDatabase()
+      // doesn't hit a TDZ "Cannot access 'SCHEMA' before initialization"
+      // error (const declarations don't hoist their values).
+      const SCHEMA = `
+        CREATE TABLE users (
+          user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          age INT,
+          address VARCHAR(255)
+        );
+        CREATE TABLE channels (
+          channel_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          name VARCHAR(255) NOT NULL,
+          owner_id UUID NOT NULL REFERENCES users(user_id),
+          subscription_count INT DEFAULT 0,
+          created_on DATE DEFAULT CURRENT_DATE
+        );
+        CREATE TABLE subscriptions (
+          subscriber_id UUID NOT NULL REFERENCES users(user_id),
+          channel_id UUID NOT NULL REFERENCES channels(channel_id),
+          subscription_type VARCHAR(20) NOT NULL,
+          PRIMARY KEY (subscriber_id, channel_id)
+        );
+        CREATE TABLE videos (
+          video_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          url VARCHAR(255) NOT NULL,
+          title VARCHAR(255) NOT NULL,
+          channel_id UUID NOT NULL REFERENCES channels(channel_id),
+          thumbnail_url VARCHAR(255),
+          category VARCHAR(20) NOT NULL,
+          keyword VARCHAR(20) NOT NULL,
+          tag VARCHAR(20) NOT NULL,
+          duration INTERVAL NOT NULL,
+          description TEXT,
+          uploader_id UUID NOT NULL REFERENCES users(user_id),
+          upload_date date DEFAULT CURRENT_DATE,
+          upload_time time DEFAULT CURRENT_TIME
+        );
+        CREATE TABLE video_statistics (
+          video_id UUID NOT NULL PRIMARY KEY REFERENCES videos(video_id),
+          likes INT DEFAULT 0,
+          dislikes INT DEFAULT 0,
+          view_count INT DEFAULT 0,
+          share_count INT DEFAULT 0
+        );
+        CREATE TABLE comments (
+          comment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          video_id UUID NOT NULL REFERENCES videos(video_id),
+          user_id UUID NOT NULL REFERENCES users(user_id),
+          text TEXT NOT NULL,
+          likes INT DEFAULT 0,
+          sentiment float NOT NULL,
+          commented_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE sponsors (
+          sponsor_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          name VARCHAR(255) NOT NULL,
+          phone VARCHAR(255),
+          address VARCHAR(255)
+        );
+        CREATE TABLE sponsored_videos (
+          video_id UUID NOT NULL REFERENCES videos(video_id),
+          sponsor_id UUID NOT NULL REFERENCES sponsors(sponsor_id),
+          amount DECIMAL(10,2) NOT NULL,
+          PRIMARY KEY (video_id, sponsor_id)
+        );
+      `
+
+      // Compact seed: representative data so the queries return interesting
+      // results. Smaller than the original 1000 users → keeps the demo
+      // snappy on PGlite.
+      const SEED = `
+        INSERT INTO users (name, email, age, address) VALUES
+          ('Taylor Swift', 'taylor@example.com', 32, 'Nashville, TN, USA'),
+          ('Marvel Entertainment', 'marvel@example.com', 50, 'Burbank, CA, USA'),
+          ('alice', 'alice@example.com', 25, '101 Main, USA'),
+          ('bob', 'bob@example.com', 45, '202 Oak, USA'),
+          ('carol', 'carol@example.com', 19, '303 Pine, UK'),
+          ('dave', 'dave@example.com', 67, '404 Elm, USA'),
+          ('eve', 'eve@example.com', 33, '505 Maple, CA');
+
+        INSERT INTO channels (name, owner_id, subscription_count, created_on)
+          SELECT 'Taylor Swift Channel', user_id, 5000, '2022-06-01' FROM users WHERE name='Taylor Swift';
+        INSERT INTO channels (name, owner_id, subscription_count, created_on)
+          SELECT 'Marvel Entertainment Channel', user_id, 8000, '2023-01-01' FROM users WHERE name='Marvel Entertainment';
+        INSERT INTO channels (name, owner_id, subscription_count, created_on)
+          SELECT 'alice channel', user_id, 12, '2024-02-15' FROM users WHERE name='alice';
+
+        INSERT INTO videos (url, title, channel_id, category, keyword, tag, duration, uploader_id, upload_date)
+          SELECT 'https://yt/cardigan', 'cardigan', c.channel_id, 'Music', 'pop', 'taylor', INTERVAL '4 minutes', u.user_id, CURRENT_DATE - INTERVAL '7 days'
+          FROM channels c JOIN users u ON c.owner_id = u.user_id WHERE c.name='Taylor Swift Channel';
+        INSERT INTO videos (url, title, channel_id, category, keyword, tag, duration, uploader_id, upload_date)
+          SELECT 'https://yt/wandavision', 'WandaVision Trailer', c.channel_id, 'Trailer', 'mcu', 'wanda', INTERVAL '3 minutes', u.user_id, CURRENT_DATE - INTERVAL '14 days'
+          FROM channels c JOIN users u ON c.owner_id = u.user_id WHERE c.name='Marvel Entertainment Channel';
+        INSERT INTO videos (url, title, channel_id, category, keyword, tag, duration, uploader_id, upload_date)
+          SELECT 'https://yt/loki', 'Loki S2 Trailer', c.channel_id, 'Trailer', 'mcu', 'loki', INTERVAL '2 minutes', u.user_id, CURRENT_DATE - INTERVAL '30 days'
+          FROM channels c JOIN users u ON c.owner_id = u.user_id WHERE c.name='Marvel Entertainment Channel';
+        INSERT INTO videos (url, title, channel_id, category, keyword, tag, duration, uploader_id, upload_date)
+          SELECT 'https://yt/cooking', 'Pasta Recipe', c.channel_id, 'Cooking', 'food', 'pasta', INTERVAL '6 minutes', u.user_id, CURRENT_DATE - INTERVAL '3 days'
+          FROM channels c JOIN users u ON c.owner_id = u.user_id WHERE c.name='alice channel';
+        INSERT INTO videos (url, title, channel_id, category, keyword, tag, duration, uploader_id, upload_date)
+          SELECT 'https://yt/hiking', 'Trail to Yosemite', c.channel_id, 'Outdoor', 'food', 'hike', INTERVAL '8 minutes', u.user_id, CURRENT_DATE - INTERVAL '20 days'
+          FROM channels c JOIN users u ON c.owner_id = u.user_id WHERE c.name='alice channel';
+
+        INSERT INTO video_statistics (video_id, likes, view_count, share_count, dislikes)
+          SELECT video_id, 10000, 50000, 800, 50 FROM videos WHERE title='cardigan';
+        INSERT INTO video_statistics (video_id, likes, view_count, share_count, dislikes)
+          SELECT video_id, 25000, 200000, 5000, 200 FROM videos WHERE title='WandaVision Trailer';
+        INSERT INTO video_statistics (video_id, likes, view_count, share_count, dislikes)
+          SELECT video_id, 18000, 95000, 1200, 100 FROM videos WHERE title='Loki S2 Trailer';
+        INSERT INTO video_statistics (video_id, likes, view_count) SELECT video_id, 200, 1000 FROM videos WHERE title='Pasta Recipe';
+        INSERT INTO video_statistics (video_id, likes, view_count) SELECT video_id, 150, 800 FROM videos WHERE title='Trail to Yosemite';
+
+        INSERT INTO comments (video_id, user_id, text, sentiment)
+          SELECT v.video_id, u.user_id, 'Loved this!', 0.9 FROM videos v, users u WHERE v.title='cardigan' AND u.name='alice';
+        INSERT INTO comments (video_id, user_id, text, sentiment)
+          SELECT v.video_id, u.user_id, 'Bored.', -0.3 FROM videos v, users u WHERE v.title='cardigan' AND u.name='bob';
+        INSERT INTO comments (video_id, user_id, text, sentiment)
+          SELECT v.video_id, u.user_id, 'Brilliant marketing!', 0.7 FROM videos v, users u WHERE v.title='WandaVision Trailer' AND u.name='carol';
+        INSERT INTO comments (video_id, user_id, text, sentiment)
+          SELECT v.video_id, u.user_id, 'Cant wait', 0.6 FROM videos v, users u WHERE v.title='Loki S2 Trailer' AND u.name='dave';
+        INSERT INTO comments (video_id, user_id, text, sentiment)
+          SELECT v.video_id, u.user_id, 'Yum', 0.8 FROM videos v, users u WHERE v.title='Pasta Recipe' AND u.name='eve';
+
+        INSERT INTO sponsors (name, phone, address) VALUES
+          ('Squarespace', '+1-555-0001', 'NY, NY'),
+          ('NordVPN', '+1-555-0002', 'Panama City'),
+          ('Audible', '+1-555-0003', 'Newark, NJ');
+
+        INSERT INTO sponsored_videos (video_id, sponsor_id, amount)
+          SELECT v.video_id, s.sponsor_id, 50000.00 FROM videos v, sponsors s WHERE v.title='WandaVision Trailer' AND s.name='Squarespace';
+        INSERT INTO sponsored_videos (video_id, sponsor_id, amount)
+          SELECT v.video_id, s.sponsor_id, 75000.00 FROM videos v, sponsors s WHERE v.title='Loki S2 Trailer' AND s.name='NordVPN';
+        INSERT INTO sponsored_videos (video_id, sponsor_id, amount)
+          SELECT v.video_id, s.sponsor_id, 30000.00 FROM videos v, sponsors s WHERE v.title='cardigan' AND s.name='Audible';
+        INSERT INTO sponsored_videos (video_id, sponsor_id, amount)
+          SELECT v.video_id, s.sponsor_id, 25000.00 FROM videos v, sponsors s WHERE v.title='Pasta Recipe' AND s.name='Squarespace';
+
+        INSERT INTO subscriptions (subscriber_id, channel_id, subscription_type)
+          SELECT u.user_id, c.channel_id, 'paid' FROM users u, channels c WHERE u.name='alice' AND c.name='Marvel Entertainment Channel';
+        INSERT INTO subscriptions (subscriber_id, channel_id, subscription_type)
+          SELECT u.user_id, c.channel_id, 'paid' FROM users u, channels c WHERE u.name='bob' AND c.name='Marvel Entertainment Channel';
+        INSERT INTO subscriptions (subscriber_id, channel_id, subscription_type)
+          SELECT u.user_id, c.channel_id, 'free' FROM users u, channels c WHERE u.name='carol' AND c.name='Marvel Entertainment Channel';
+        INSERT INTO subscriptions (subscriber_id, channel_id, subscription_type)
+          SELECT u.user_id, c.channel_id, 'paid' FROM users u, channels c WHERE u.name='dave' AND c.name='Taylor Swift Channel';
+      `
+
+      const QUERIES = {
+        q1: {
+          description: 'Find the sponsor who has sponsored the highest amount in YouTube. Display the sponsor\u2019s name, phone number and the total amount sponsored.',
+          sql: `SELECT s.name, s.phone, SUM(sv.amount) AS total_sponsored
+FROM sponsors s
+JOIN sponsored_videos sv ON s.sponsor_id = sv.sponsor_id
+GROUP BY s.name, s.phone
+ORDER BY total_sponsored DESC
+LIMIT 1;`,
+        },
+        q2: {
+          description: 'Find the like:view ratio of each video belonging to channels owned by users with "Marvel Entertainment" in their name. Ordered ASC by title.',
+          sql: `SELECT v.title, c.name AS channel_name,
+       ROUND((vs.likes::numeric / NULLIF(vs.view_count, 0))::numeric, 4) AS like_view_ratio
+FROM videos v
+JOIN video_statistics vs ON v.video_id = vs.video_id
+JOIN channels c ON v.channel_id = c.channel_id
+JOIN users u ON c.owner_id = u.user_id
+WHERE u.name LIKE '%Marvel Entertainment%'
+ORDER BY v.title ASC;`,
+        },
+        q3: {
+          description: 'Channels created on 2023-01-01 with >0 paid subscribers (relaxed from the original >100 to fit the seed data). Display username, email, channel name, subscriber count.',
+          sql: `SELECT u.name AS username, u.email, c.name AS channel_name,
+       (SELECT COUNT(*) FROM subscriptions s WHERE s.channel_id = c.channel_id AND s.subscription_type = 'paid') AS paid_subs
+FROM users u
+JOIN channels c ON u.user_id = c.owner_id
+WHERE c.created_on = '2023-01-01'
+  AND (SELECT COUNT(*) FROM subscriptions s WHERE s.channel_id = c.channel_id AND s.subscription_type = 'paid') > 0;`,
+        },
+        q4: {
+          description: 'Average sentiment score per video keyword. Highest first.',
+          sql: `SELECT v.keyword, ROUND(AVG(c.sentiment)::numeric, 3) AS avg_sentiment
+FROM videos v
+JOIN comments c ON v.video_id = c.video_id
+GROUP BY v.keyword
+ORDER BY avg_sentiment DESC;`,
+        },
+        q5: {
+          description: 'Min/max age of users who commented on the most-commented video on Taylor Swift\'s channel.',
+          sql: `WITH ts_channel AS (
+  SELECT c.channel_id FROM channels c JOIN users u ON c.owner_id = u.user_id WHERE u.name = 'Taylor Swift'
+), most_commented AS (
+  SELECT v.video_id, v.title, COUNT(co.comment_id) AS n_comments
+  FROM videos v JOIN comments co ON v.video_id = co.video_id
+  WHERE v.channel_id IN (SELECT channel_id FROM ts_channel)
+  GROUP BY v.video_id, v.title
+  ORDER BY n_comments DESC LIMIT 1
+)
+SELECT mc.title, MIN(u.age) AS min_age, MAX(u.age) AS max_age
+FROM most_commented mc
+JOIN comments co ON mc.video_id = co.video_id
+JOIN users u ON co.user_id = u.user_id
+GROUP BY mc.title;`,
+        },
+        q6: {
+          description: 'US-based content creators who posted at least one video each week of the last month. Username, channels owned, total subscriber count.',
+          sql: `WITH us_creators AS (
+  SELECT u.user_id, u.name, u.address
+  FROM users u
+  WHERE u.address LIKE '%USA%'
+), creator_channels AS (
+  SELECT uc.user_id, uc.name AS username, c.channel_id, c.name AS channel_name, c.subscription_count
+  FROM us_creators uc
+  JOIN channels c ON uc.user_id = c.owner_id
+), weekly_video_count AS (
+  SELECT cc.user_id, COUNT(DISTINCT EXTRACT(WEEK FROM v.upload_date)) AS weeks_with_videos
+  FROM creator_channels cc
+  JOIN videos v ON cc.channel_id = v.channel_id
+  WHERE v.upload_date >= CURRENT_DATE - INTERVAL '30 days'
+  GROUP BY cc.user_id
+)
+SELECT cc.username,
+       string_agg(cc.channel_name, ', ') AS channels,
+       SUM(cc.subscription_count) AS total_subs
+FROM creator_channels cc
+JOIN weekly_video_count w ON cc.user_id = w.user_id
+WHERE w.weeks_with_videos >= 1
+GROUP BY cc.user_id, cc.username;`,
+        },
+      }
+
+      const SCRIPTS = {
+        'show-schema': { description: 'The 7-table CREATE TABLE schema.', sql: SCHEMA },
+        seed: { description: 'Seed the database with the synthetic dataset (DROP all rows first).', sql: '-- (truncate + reseed handled by Re-seed button)' },
+        describe: {
+          description: 'List every table and its row count.',
+          sql: `SELECT relname AS table_name,
+       n_live_tup AS rows
+FROM pg_stat_user_tables
+ORDER BY relname;`,
+        },
+      }
+
+      async function seedDatabase() {
+        await db.exec(SCHEMA)
+        await db.exec(SEED)
+      }
+
+      async function clearAndReseed() {
+        await db.exec(`
+          DROP TABLE IF EXISTS sponsored_videos, comments, video_statistics, videos, subscriptions, channels, sponsors, users CASCADE;
+        `)
+        await seedDatabase()
+      }
+
+      // Boot block — runs after all const declarations + seedDatabase have
+      // been initialised. Originally lived at the top of the module body
+      // but tripped a TDZ error because const SCHEMA/SEED weren't yet in
+      // their initialised state when seedDatabase() referenced them.
+      // `db` is declared at module scope so runSql / clearAndReseed (defined
+      // both above and below) can read it.
+      let db = null
+      try {
+        status.textContent = 'Booting PGlite…'
+        db = new PGlite()
+        await db.waitReady
+        status.textContent = 'PGlite ready · seeding…'
+        await seedDatabase()
+        status.textContent = 'Ready'
+      } catch (err) {
+        status.textContent = 'PGlite failed to boot'
+        results.innerHTML = `<div class="err">${err.message}\n${err.stack || ''}</div>`
+        $('run-btn').disabled = true
+      }
+
+      function renderResult(rows, fields) {
+        if (!rows || rows.length === 0) {
+          return '<p class="meta">(no rows)</p>'
+        }
+        const headers = fields.map((f) => f.name)
+        const thead = '<thead><tr>' + headers.map((h) => `<th>${h}</th>`).join('') + '</tr></thead>'
+        const tbody =
+          '<tbody>' +
+          rows
+            .map(
+              (row) =>
+                '<tr>' +
+                headers
+                  .map((h) => `<td>${formatCell(row[h])}</td>`)
+                  .join('') +
+                '</tr>',
+            )
+            .join('') +
+          '</tbody>'
+        return `<table>${thead}${tbody}</table>`
+      }
+
+      function formatCell(v) {
+        if (v === null || v === undefined) return '<em style="color: var(--muted)">null</em>'
+        if (v instanceof Date) return v.toISOString()
+        if (typeof v === 'object') return JSON.stringify(v)
+        const s = String(v)
+        if (s.length > 80) return s.slice(0, 77) + '…'
+        return s
+      }
+
+      async function runSql(sql) {
+        if (!db) return
+        results.innerHTML = '<p class="meta">Running…</p>'
+        const start = performance.now()
+        try {
+          const out = await db.exec(sql)
+          const dur = (performance.now() - start).toFixed(0)
+          // out is an array of result objects (one per statement)
+          const last = out[out.length - 1]
+          if (last && Array.isArray(last.rows) && last.rows.length > 0) {
+            results.innerHTML =
+              `<p class="meta">${last.rows.length} row${last.rows.length === 1 ? '' : 's'} · ${dur}ms</p>` +
+              renderResult(last.rows, last.fields)
+          } else {
+            results.innerHTML = `<p class="meta">OK · ${dur}ms · no rows returned</p>`
+          }
+        } catch (err) {
+          results.innerHTML = `<div class="err">${err.message}</div>`
+        }
+      }
+
+      function activate(target) {
+        document.querySelectorAll('.sidebar button').forEach((b) => b.classList.remove('active'))
+        if (target) target.classList.add('active')
+      }
+
+      // Sidebar wiring
+      document.querySelectorAll('[data-query]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-query')
+          const q = QUERIES[id]
+          $('sql').value = q.sql
+          $('active-label').textContent = btn.textContent.trim()
+          results.innerHTML = `<div class="description">${q.description}</div><p class="meta">Hit Run to execute.</p>`
+          activate(btn)
+        })
+      })
+      document.querySelectorAll('[data-script]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-script')
+          activate(btn)
+          if (id === 'seed') {
+            $('active-label').textContent = btn.textContent.trim()
+            results.innerHTML = '<p class="meta">Re-seeding…</p>'
+            try {
+              await clearAndReseed()
+              results.innerHTML = '<p class="meta">Re-seeded successfully.</p>'
+            } catch (err) {
+              results.innerHTML = `<div class="err">${err.message}</div>`
+            }
+            return
+          }
+          const s = SCRIPTS[id]
+          $('sql').value = s.sql.trim()
+          $('active-label').textContent = btn.textContent.trim()
+          if (id === 'describe') {
+            await runSql(s.sql)
+          } else {
+            results.innerHTML = `<div class="description">${s.description}</div><p class="meta">View only — not run automatically.</p>`
+          }
+        })
+      })
+      $('run-btn').addEventListener('click', () => runSql($('sql').value))
+      $('sql').addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+          e.preventDefault()
+          runSql($('sql').value)
+        }
+      })
+    </script>
+  </body>
+</html>

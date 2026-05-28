@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "slug": "csci-585",
+  "category": {
+    "kind": "college",
+    "school": "USC",
+    "code": "CSCI 585",
+    "title": "Database Systems",
+    "year": 2023
+  },
+  "title": "CSCI 585 — Database Systems (USC, Spring 2023)",
+  "description": "Two interactive demos from Yan Liu's CSCI 585 alongside the original homework source. The Bay Area photo spatial demo plots 13 geotagged photos on a real map and runs convex-hull / k-NN queries client-side via turf.js. The YouTube SQL demo runs the original 7-table relational schema on PGlite (real PostgreSQL compiled to WebAssembly), letting you execute the 6 query exercises live in the browser. Original homework source lives alongside in HWs/HW{1..5}/.",
+  "tags": [
+    "sql",
+    "postgresql",
+    "pglite",
+    "spatial",
+    "postgis",
+    "geospatial",
+    "wasm",
+    "usc"
+  ],
+  "completionLevel": "works",
+  "defaultAssetId": "spatial",
+  "assets": [
+    {
+      "id": "spatial",
+      "title": "HW3 — Bay Area Photo Spatial Queries",
+      "group": "Demos",
+      "description": "13 geotagged photos around Fremont/Pleasanton/Livermore on a maplibre-gl basemap. Toggle convex hull, click anywhere to find the 4 nearest photos, enable density to see a Gaussian kernel-density visualization. Same dataset as the original PostGIS HW3, computed client-side via turf.js (no server-side DB required).",
+      "embed": {
+        "kind": "static-html",
+        "entry": "spatial-queries.html"
+      }
+    },
+    {
+      "id": "youtube-sql",
+      "title": "HW2 — YouTube SQL Schema (PGlite)",
+      "group": "Demos",
+      "description": "The 7-table YouTube-like relational schema running on real PostgreSQL via PGlite (WASM). Pick one of the six original query exercises from the sidebar, hit Run, see the results. Cmd/Ctrl+Enter to execute. The synthetic dataset is small enough to keep responses snappy.",
+      "embed": {
+        "kind": "static-html",
+        "entry": "youtube-sql.html"
+      }
+    }
+  ],
+  "build": {
+    "ci": true,
+    "workflow": ".github/workflows/build-web-asset.yml"
+  }
+}
