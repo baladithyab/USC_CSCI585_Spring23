@@ -37,7 +37,7 @@
       "id": "youtube-sql",
       "title": "HW2 — YouTube SQL Schema (PGlite)",
       "group": "Demos",
-      "description": "The 7-table YouTube-like relational schema running on real PostgreSQL via PGlite (WASM). Pick one of the six original query exercises from the sidebar, hit Run, see the results. Cmd/Ctrl+Enter to execute. The synthetic dataset is small enough to keep responses snappy.",
+      "description": "The 7-table YouTube-like relational schema running on real PostgreSQL via PGlite (WASM). Boots with a small synthetic dataset, then a sidebar button lets you replay the original course `create_table.sql` + `insert_data.sql` — the same SQL submitted for graded HW2 (1000 users, ~150K comments). Either mode runs the 6 query exercises live; or browse the original course source files (q1.sql … q6.sql, the literal graded answers) in the sidebar's 'Course source files' section. Cmd/Ctrl+Enter to execute.",
       "embed": {
         "kind": "static-html",
         "entry": "youtube-sql.html"
