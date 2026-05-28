@@ -49,9 +49,9 @@
     "workflow": ".github/workflows/build-web-asset.yml"
   },
   "delivery": {
-    "url": "https://assets-r2.codeseys.io/csci-585/70ff67c/",
-    "version": "70ff67c",
-    "sizeBytes": 62956,
+    "url": "https://assets-r2.codeseys.io/csci-585/7729203/",
+    "version": "7729203",
+    "sizeBytes": 717707,
     "mode": "runtime-r2"
   }
 }
