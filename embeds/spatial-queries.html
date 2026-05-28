@@ -83,7 +83,7 @@
   <body>
     <header>
       <h1>Bay Area Photo Spatial Queries</h1>
-      <p>13 geotagged Bay Area POIs from the original photos.kml — community colleges, gas stations, malls, parks, restaurants, theaters. <strong>Click a node to see its category, address, and Street View link.</strong> Click anywhere else on the map to find the 4 nearest. Toggle the convex hull and density layers via the panel. Same dataset and queries as the HW3 PostGIS exercise — but client-side via turf.js, no server.</p>
+      <p>13 geotagged Bay Area POIs from the original photos.kml — community colleges, gas stations, malls, parks, restaurants, theaters. <strong>Click a node</strong> to see a building-footprint thumbnail from OpenStreetMap, the category, and a Street View link. Click anywhere else on the map to find the 4 nearest. Toggle the convex hull and density layers via the panel. Same dataset and queries as the HW3 PostGIS exercise — but client-side via turf.js, no server.</p>
     </header>
     <div class="layout">
       <aside class="controls">
@@ -302,9 +302,16 @@
           const gmapsSearch = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meta.specific + ' ' + meta.city)}`
 
           const html = `
-            <div style="font: 12px/1.4 system-ui; max-width: 240px;">
-              <div style="font-size: 22px;">${meta.icon}</div>
-              <div style="font-weight: 600; color: ${meta.color}; margin-top: 2px;">${meta.label}${meta.number ? ' #' + meta.number : ''}</div>
+            <div style="font: 12px/1.4 system-ui; max-width: 260px;">
+              <div style="position: relative;">
+                <img src="data/photos/${f.properties.name}.jpg"
+                     loading="lazy"
+                     alt="OSM rendering of ${meta.specific} (${meta.label})"
+                     style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; display: block; background: #f4f4f5;"
+                     onerror="this.style.display='none'" />
+                <div style="position: absolute; top: 4px; left: 4px; background: rgba(255,255,255,0.92); padding: 2px 6px; border-radius: 3px; font-size: 18px;">${meta.icon}</div>
+              </div>
+              <div style="font-weight: 600; color: ${meta.color}; margin-top: 6px;">${meta.label}${meta.number ? ' #' + meta.number : ''}</div>
               <div style="font-size: 13px; margin-top: 2px;">${meta.specific.replace(/([A-Z])/g, ' $1').trim()}</div>
               <div style="color: #555; font-size: 11px;">${meta.city}, CA</div>
               <div style="font-family: ui-monospace, monospace; font-size: 10px; color: #777; margin-top: 4px;">
@@ -328,10 +335,10 @@
                 </a>
               </div>
               <div style="margin-top: 6px; font-size: 9px; color: #a1a1aa; line-height: 1.3;">
-                The original CSCI 585 HW3 collected geotagged photos at each
-                of these locations. The photos themselves aren't redistributed
-                here, but the geometry and the category labels are: open the
-                location in Street View to see what it looks like today.
+                The original CSCI 585 HW3 collected personal geotagged selfies at each location;
+                those aren't redistributed. The thumbnail above is a building-footprint zoom from
+                <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color: #1d4ed8;">© OpenStreetMap contributors</a>
+                — open in Street View to see the real location.
               </div>
             </div>`
           new maplibregl.Popup({ closeButton: true, maxWidth: '280px' })
