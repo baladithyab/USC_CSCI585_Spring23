@@ -1,2 +1,6 @@
 # dwai
 email.txt
+
+# Never commit secrets
+**/.env
+**/HW4.zip

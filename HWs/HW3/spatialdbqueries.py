@@ -140,12 +140,16 @@ if __name__ == "__main__":
         kml_data = read_kml(kml_file)
 
         # Database configuration
+        # NOTE: original credentials were redacted before publishing this repo.
+        # Set env vars CSCI585_DB_USER / CSCI585_DB_PASSWORD / CSCI585_DB_HOST
+        # to point this at your own Postgres+PostGIS instance.
+        import os
         db_config = {
-            'dbname': 'postgres',                          # CHANGE THIS
-            'user': 'postgres',                            # CHANGE THIS
-            'password': '***REVOKED***',                # CHANGE THIS
-            'host': '***REVOKED-SUPABASE-HOST***',  # CHANGE THIS
-            'port': '5432',
+            'dbname':   os.environ.get('CSCI585_DB_NAME',     'postgres'),
+            'user':     os.environ.get('CSCI585_DB_USER',     'postgres'),
+            'password': os.environ.get('CSCI585_DB_PASSWORD', ''),
+            'host':     os.environ.get('CSCI585_DB_HOST',     'localhost'),
+            'port':     os.environ.get('CSCI585_DB_PORT',     '5432'),
         }
 
         # Insert coordinates into the database
